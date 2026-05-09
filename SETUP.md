@@ -1,100 +1,93 @@
 # Setup — Plugins
 
-`claude-system` references two MCP plugins in `CLAUDE.md` and the skills. This guide covers how to install them.
+`claude-system` referencia dois plugins em `CLAUDE.md` e nas skills. Este guia cobre como instalá-los.
 
-Both plugins are optional but recommended — Claude falls back to native tools (Grep, Read) when they are unavailable.
+Ambos são opcionais mas recomendados — Claude usa Grep/Read como fallback quando não estão disponíveis.
 
 ---
 
 ## Serena — LSP code intelligence
 
-**What it does**: Gives Claude LSP-powered code navigation — find symbol definitions, list all usages of a function, discover what implements an interface, search by pattern across the codebase. Dramatically faster and more accurate than grep for these tasks.
+**O que faz**: Navegação de código via LSP — encontra definições de símbolos, lista todos os usos de uma função, descobre o que implementa uma interface, busca por padrão no codebase.
 
 **Source**: [github.com/oraios/serena](https://github.com/oraios/serena)
-**Marketplace**: `serena@claude-plugins-official`
 
 ### Install
 
-```bash
-claude plugin install serena
-```
+Disponível diretamente no marketplace do Claude Code. Abra o Claude Code e instale pelo marketplace (ícone de puzzle ou `/plugin install serena`).
 
-Restart Claude Code. Serena activates automatically for any project with a supported language (Python, TypeScript, Go, Java, Rust, and more).
+Reinicie o Claude Code após instalar. Serena ativa automaticamente para projetos com linguagens suportadas (Python, TypeScript, Go, Java, Rust, entre outras).
 
-### When Claude uses it
+### Quando o Claude usa
 
-| Task | Tool called |
+| Task | Tool chamado |
 |------|-------------|
-| Find where a function/class is defined | `find_symbol` |
-| Find all callers of a function | `find_referencing_symbols` |
-| Get an overview of a file's symbols | `get_symbols_overview` |
-| Find what implements an interface | `find_implementations` |
-| Search by name pattern across the codebase | `search_for_pattern` |
-
-Claude prefers Serena over Grep for all of the above. If Serena returns no results or LSP is not initialized for the language, it falls back to Grep/Read.
+| Encontrar onde uma função/classe está definida | `find_symbol` |
+| Listar todos os callers de uma função | `find_referencing_symbols` |
+| Visão geral dos símbolos de um arquivo | `get_symbols_overview` |
+| Descobrir o que implementa uma interface | `find_implementations` |
+| Buscar por padrão de nome no codebase | `search_for_pattern` |
 
 ---
 
 ## Lumen — Semantic codebase search
 
-**What it does**: Indexes your codebase and lets Claude search by *concept* rather than exact token. Useful before broad analysis tasks (security review, architecture audit, tech debt analysis) where you want context across multiple files without knowing the exact symbol names.
+**O que faz**: Indexa o codebase e permite busca por *conceito* em vez de token exato. Útil antes de análises amplas (security review, arch audit, tech debt) onde você quer contexto de múltiplos arquivos sem saber os nomes exatos dos símbolos.
 
-**Source**: [github.com/ory/claude-plugins](https://github.com/ory/claude-plugins)
-**Marketplace**: `lumen@ory` (custom marketplace)
+**Source**: [github.com/ory/lumen](https://github.com/ory/lumen)
+
+### Pré-requisito — Ollama com o modelo de embeddings
+
+Lumen precisa do Ollama rodando localmente com o modelo de embeddings:
+
+```bash
+ollama pull ordis/jina-embeddings-v2-base-code
+```
+
+Inicie o Ollama antes de usar o Lumen.
 
 ### Install
 
-**Step 1** — Register the Ory marketplace in `~/.claude/settings.json`:
+**Passo 1** — Adicionar o marketplace da Ory no Claude Code:
 
-```json
-{
-  "extraKnownMarketplaces": {
-    "ory": {
-      "source": {
-        "source": "github",
-        "repo": "ory/claude-plugins"
-      }
-    }
-  }
-}
+```
+/plugin marketplace add ory/claude-plugins
 ```
 
-**Step 2** — Install the plugin:
+**Passo 2** — Instalar o Lumen:
 
-```bash
-claude plugin install lumen@ory
+```
+/plugin install lumen@ory
 ```
 
-**Step 3** — Index your project (run from the project root):
+**Passo 3** — Verificar a instalação em uma nova sessão:
 
-```bash
-claude lumen index .
+```
+/lumen:doctor
 ```
 
-Restart Claude Code. On the next session start, Claude will confirm the index is ready.
+Na primeira sessão após instalar, o Lumen indexa o projeto automaticamente em background.
 
-### When Claude uses it
+### Quando o Claude usa
 
-| Task | Tool called |
+| Task | Tool chamado |
 |------|-------------|
-| Search by concept before `/sec-review`, `/arch-debt`, `/dev-review` | `mcp__lumen__semantic_search` |
-| Explore unfamiliar codebase before analysis | `mcp__lumen__semantic_search` |
+| Busca por conceito antes de `/sec-review`, `/arch-debt`, `/dev-review` | `mcp__lumen__semantic_search` |
+| Exploração inicial de codebase desconhecido antes de análise | `mcp__lumen__semantic_search` |
 
-Claude falls back to Read/Glob if Lumen returns low-confidence results or is not available.
+### Manutenção
 
-### Re-indexing
+Re-indexar após mudanças significativas no codebase:
 
-Re-index after significant changes to the codebase:
-
-```bash
-claude lumen index .
+```
+/lumen:reindex
 ```
 
 ---
 
-## Verifying both plugins are active
+## Verificando que os dois estão ativos
 
-Check your `~/.claude/settings.json` for:
+Verifique o `~/.claude/settings.json`:
 
 ```json
 {
@@ -104,5 +97,3 @@ Check your `~/.claude/settings.json` for:
   }
 }
 ```
-
-If `install.sh` was run with `jq` available, the merge preserves any `enabledPlugins` you already had. Otherwise enable them manually via `claude plugin enable <name>`.
