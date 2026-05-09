@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Backups gerados pelo install.sh
+*.bak
+*.backup.*
+
+# Logs gerados pelos hooks
+hooks/audit.log
+
+# Configs locais que não devem ir pro repo
+.claude/settings.local.json
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
