@@ -17,7 +17,7 @@ mkdir -p "$BACKUP"
 echo "  Backup saved to $BACKUP"
 
 # Rotate backups: keep only the 3 most recent
-mapfile -t OLD_BACKUPS < <(ls -1dt "$CLAUDE_DIR"/backup-* 2>/dev/null | tail -n +4)
+mapfile -t OLD_BACKUPS < <(find "$CLAUDE_DIR" -maxdepth 1 -name 'backup-*' -type d | sort -r | tail -n +4)
 for old in "${OLD_BACKUPS[@]}"; do
   rm -rf "$old"
 done
